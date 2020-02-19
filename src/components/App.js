@@ -15,6 +15,39 @@ class App extends React.Component {
     }
   }
 
+  fetchAllPets = ()=> {
+    fetch("/api/pets")
+    .then(r => r.json())
+    .then(allPets=>{
+      this.setState({
+        pets: allPets
+      })})
+  }
+
+  fetchFilteredPets = ()=>{
+    const selectedType = this.state.filters.type
+    fetch(`/api/pets?type=${selectedType}`)
+    .then(r => r.json())
+    .then(filteredPets=>{
+      this.setState({
+        pets: filteredPets
+      })
+    })
+
+  }
+  handleDropdown = (event) => {
+    // console.log(this)
+    this.setState({
+      filters:{type: event.target.value}
+    })
+  }
+  handleAdoption = (event)=>{
+    let petID = event.target.id
+    let petInstance = this.state.pets.map(pet=> {
+      return pet.id === petID ? {...pet, isAdopted: true} : pet})
+      this.setState({pets: petInstance})
+    }
+  
   render() {
     return (
       <div className="ui container">
@@ -24,10 +57,11 @@ class App extends React.Component {
         <div className="ui container">
           <div className="ui grid">
             <div className="four wide column">
-              <Filters />
+              <Filters x={this.state} dropDown={this.handleDropdown} fetching={
+                this.state.filters.type == "all" ? this.fetchAllPets : this.fetchFilteredPets}/>
             </div>
             <div className="twelve wide column">
-              <PetBrowser />
+    {this.state.pets === [] ? null : <PetBrowser pets={this.state.pets} adoption={this.handleAdoption}/>}  
             </div>
           </div>
         </div>
